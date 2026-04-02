@@ -213,6 +213,40 @@ async def swisstopo_elevation_profile(params: ElevationProfileInput) -> str:
     return await elevation_profile(params)
 
 
+# --- ÖREB Tools ---
+from swisstopo_mcp.oereb import GetEgridInput, get_egrid, GetOerebExtractInput, get_oereb_extract
+
+
+@mcp.tool(
+    name="swisstopo_get_egrid",
+    annotations={
+        "title": "Grundstück-ID (EGRID) ermitteln",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    },
+)
+async def swisstopo_get_egrid(params: GetEgridInput) -> str:
+    """Ermittelt die EGRID (Grundstück-ID) aus Koordinaten für einen bestimmten Kanton."""
+    return await get_egrid(params)
+
+
+@mcp.tool(
+    name="swisstopo_get_oereb_extract",
+    annotations={
+        "title": "ÖREB-Auszug abrufen",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    },
+)
+async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
+    """Ruft öffentlich-rechtliche Eigentumsbeschränkungen (ÖREB) für ein Grundstück ab."""
+    return await get_oereb_extract(params)
+
+
 def main():
     transport = os.environ.get("MCP_TRANSPORT", "stdio").lower()
     if transport in ("sse", "streamable-http"):
