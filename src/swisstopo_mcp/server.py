@@ -19,6 +19,40 @@ mcp = FastMCP(
     ),
 )
 
+# --- Geocoding Tools ---
+from swisstopo_mcp.geocoding import GeocodeInput, geocode, ReverseGeocodeInput, reverse_geocode
+
+
+@mcp.tool(
+    name="swisstopo_geocode",
+    annotations={
+        "title": "Adresse geocodieren",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    },
+)
+async def swisstopo_geocode(params: GeocodeInput) -> str:
+    """Wandelt Adressen, Ortsnamen oder PLZ in Koordinaten um (Geocoding)."""
+    return await geocode(params)
+
+
+@mcp.tool(
+    name="swisstopo_reverse_geocode",
+    annotations={
+        "title": "Koordinaten zu Adresse",
+        "readOnlyHint": True,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    },
+)
+async def swisstopo_reverse_geocode(params: ReverseGeocodeInput) -> str:
+    """Findet die nächstgelegene Adresse zu gegebenen Koordinaten (Reverse Geocoding)."""
+    return await reverse_geocode(params)
+
+
 # --- REST API Tools ---
 from swisstopo_mcp.rest_api import (
     SearchLayersInput,
