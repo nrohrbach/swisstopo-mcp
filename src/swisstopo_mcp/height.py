@@ -12,6 +12,7 @@ from swisstopo_mcp.api_client import (
     geo_admin_request,
     handle_api_error,
     parse_coordinate_string,
+    wgs84_to_lv95,
 )
 
 
@@ -108,12 +109,19 @@ def format_elevation_profile(points: list[dict[str, Any]]) -> str:
 async def get_height(params: HeightInput) -> str:
     """Return the elevation above sea level for a WGS84 coordinate."""
     try:
+        # Height API only supports LV95 (2056) and LV03 (21781), not WGS84
+        if params.sr == 4326:
+            easting, northing = wgs84_to_lv95(params.lat, params.lon)
+            sr = 2056
+        else:
+            easting, northing = params.lon, params.lat
+            sr = params.sr
         data = await geo_admin_request(
             "/rest/services/height",
             {
-                "easting": params.lon,
-                "northing": params.lat,
-                "sr": params.sr,
+                "easting": easting,
+                "northing": northing,
+                "sr": sr,
             },
         )
         height = data.get("height", "?")
@@ -126,10 +134,22 @@ async def elevation_profile(params: ElevationProfileInput) -> str:
     """Compute an elevation profile along a line defined by coordinate pairs."""
     try:
         coord_pairs = parse_coordinate_string(params.coordinates)
-        geojson = {
-            "type": "LineString",
-            "coordinates": [[lon, lat] for lat, lon in coord_pairs],
-        }
+
+        # Profile API only supports LV95 (2056) and LV03 (21781)
+        # GeoJSON coordinates must also be in the target SR
+        if params.sr == 4326:
+            lv95_coords = [wgs84_to_lv95(lat, lon) for lat, lon in coord_pairs]
+            geojson = {
+                "type": "LineString",
+                "coordinates": [[e, n] for e, n in lv95_coords],
+            }
+            sr = 2056
+        else:
+            geojson = {
+                "type": "LineString",
+                "coordinates": [[lon, lat] for lat, lon in coord_pairs],
+            }
+            sr = params.sr
         geojson_str = json.dumps(geojson, separators=(",", ":"))
 
         data = await geo_admin_request(
@@ -137,7 +157,7 @@ async def elevation_profile(params: ElevationProfileInput) -> str:
             {
                 "geom": geojson_str,
                 "nb_points": params.nb_points,
-                "sr": params.sr,
+                "sr": sr,
             },
         )
         # data is a list of profile points

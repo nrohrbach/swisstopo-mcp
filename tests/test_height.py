@@ -212,9 +212,12 @@ class TestGetHeightHandler:
         monkeypatch.setattr("swisstopo_mcp.height.geo_admin_request", mock_request)
         await get_height(HeightInput(lat=46.9481, lon=7.4474))
         assert captured["path"] == "/rest/services/height"
-        assert captured["params"]["easting"] == pytest.approx(7.4474)
-        assert captured["params"]["northing"] == pytest.approx(46.9481)
-        assert captured["params"]["sr"] == 4326
+        # WGS84 input is converted to LV95 internally
+        assert captured["params"]["sr"] == 2056
+        # Easting should be ~2600000 range (LV95)
+        assert 2500000 < captured["params"]["easting"] < 2700000
+        # Northing should be ~1200000 range (LV95)
+        assert 1100000 < captured["params"]["northing"] < 1300000
 
     async def test_api_error_returns_error_message(self, monkeypatch):
         import httpx
@@ -270,9 +273,10 @@ class TestElevationProfileHandler:
         assert captured["path"] == "/rest/services/profile.json"
         geom = _json.loads(captured["params"]["geom"])
         assert geom["type"] == "LineString"
-        # coordinates are [lon, lat] order
-        assert geom["coordinates"][0] == pytest.approx([7.4, 46.9])
-        assert geom["coordinates"][1] == pytest.approx([7.5, 47.0])
+        # WGS84 input is converted to LV95 — coordinates are [easting, northing]
+        assert 2500000 < geom["coordinates"][0][0] < 2700000  # easting range
+        assert 1100000 < geom["coordinates"][0][1] < 1300000  # northing range
+        assert captured["params"]["sr"] == 2056
 
     async def test_invalid_coordinates_returns_error(self, monkeypatch):
         async def mock_request(path, params=None):
