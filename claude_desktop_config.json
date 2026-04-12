@@ -1,10 +1,8 @@
 {
   "mcpServers": {
     "swisstopo": {
-      "command": "swisstopo-mcp",
-      "env": {
-        "SWISSTOPO_OEREB_CANTONS": "ZH"
-      }
+      "command": "python",
+      "args": ["-m", "swisstopo_mcp.server"]
     }
   }
 }

@@ -1,7 +1,11 @@
-# src/swisstopo_mcp/server.py
-from __future__ import annotations
+"""
+swisstopo-mcp — MCP-Server fuer schweizerische Bundesgeodaten.
 
-import os
+13 Tools aus 6 API-Familien: REST, Geocoding, Hoehe, STAC, WMTS, OEREB.
+Alle Endpunkte sind offen (kein API-Schluessel erforderlich, ausser OEREB-Kanton).
+"""
+
+from __future__ import annotations
 
 from mcp.server.fastmcp import FastMCP
 
@@ -270,14 +274,12 @@ async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
     return await get_oereb_extract(params)
 
 
-def main():
-    transport = os.environ.get("MCP_TRANSPORT", "stdio").lower()
-    if transport in ("sse", "streamable-http"):
-        port = int(os.environ.get("MCP_PORT", "8000"))
-        mcp.run(transport=transport, port=port)
+if __name__ == "__main__":
+    import sys
+
+    if "--http" in sys.argv:
+        port_idx = sys.argv.index("--port") + 1 if "--port" in sys.argv else None
+        port = int(sys.argv[port_idx]) if port_idx else 8000
+        mcp.run(transport="streamable-http", port=port)
     else:
         mcp.run()
-
-
-if __name__ == "__main__":
-    main()

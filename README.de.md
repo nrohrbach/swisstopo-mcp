@@ -1,163 +1,307 @@
+[English Version](README.md)
+
+> **Teil des [Swiss Public Data MCP Portfolios](https://github.com/malkreide)**
+
 # swisstopo-mcp
 
-MCP-Server für schweizerische Bundgeodaten (Swisstopo-APIs)
-
-Gibt KI-Assistenten (Claude, etc.) Zugriff auf die offizielle schweizerische Geodateninfrastruktur — Karten, Höhenmodelle, Geocodierung, Katasterauszüge und herunterladbare Datensätze — über 13 Tools aus 6 API-Familien.
-
-[![CI](https://github.com/malkreide/swisstopo-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/malkreide/swisstopo-mcp/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/swisstopo-mcp.svg)](https://pypi.org/project/swisstopo-mcp/)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
+[![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-yellow.svg)](LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-purple)](https://modelcontextprotocol.io/)
+[![Kein API-Schluessel](https://img.shields.io/badge/Auth-keiner%20erforderlich-brightgreen)](https://github.com/malkreide/swisstopo-mcp)
+![CI](https://github.com/malkreide/swisstopo-mcp/actions/workflows/ci.yml/badge.svg)
+
+> MCP-Server fuer schweizerische Bundesgeodaten -- Karten, Hoehenmodelle, Geocodierung, Katasterauszuege und herunterladbare Datensaetze via Swisstopo-APIs
+
+---
+
+## Uebersicht
+
+`swisstopo-mcp` gibt KI-Assistenten Zugriff auf die offizielle schweizerische Geodateninfrastruktur ueber 13 Tools aus 6 API-Familien, alle ohne Authentifizierung:
+
+| Quelle | Daten | API |
+|--------|-------|-----|
+| **Swisstopo REST API** | 500+ Geodaten-Layer (Gebaeude, Grenzen, Landnutzung) | REST/JSON |
+| **Geocoding** | Amtliche Adressen, Ortsnamen, PLZ | REST/JSON |
+| **Hoehenservice** | Hoehe ueber Meer, Hoehenprofile | REST/JSON |
+| **STAC-Katalog** | Orthophotos, Hoehenmodelle, 3D-Gebaeude | STAC 0.9 |
+| **WMTS** | Landeskarten, Luftbilder, Bauzonen | URL-Builder |
+| **OEREB-Kataster** | Eigentumsbeschraenkungen, Grundstuecke | REST/JSON (kantonal) |
+
+**Anker-Demo-Abfrage:** *"Welche Nutzungseinschraenkungen gelten fuer das Grundstueck an der Musterstrasse 5, Zuerich? Zeige mir den Standort auf einer Karte."*
 
 ---
 
 ## Funktionen
 
-- **13 Tools** aus **6 API-Familien** (REST, Geocoding, Höhe, STAC, WMTS, ÖREB)
-- Schweizerische Adressen geocodieren und Koordinaten rückwärts geocodieren
-- Höhe über Meer abfragen und Höhenprofile berechnen
-- Geodatensätze entdecken und herunterladen (Orthophotos, 3D-Gebäude, historische Karten)
-- Kartenobjekte an Koordinaten über 500+ Swisstopo-Layer identifizieren
-- Teilbare map.geo.admin.ch-Links generieren
-- Grundstück-IDs (EGRID) nachschlagen und ÖREB-Katasterauszüge abrufen
+- 🗺️ **13 Tools** aus **6 API-Familien** (REST, Geocoding, Hoehe, STAC, WMTS, OEREB)
+- 🔍 Schweizerische Adressen geocodieren und Koordinaten rueckwaerts geocodieren
+- 🏔️ Hoehe ueber Meer abfragen und Hoehenprofile berechnen
+- 📦 Geodatensaetze entdecken und herunterladen (Orthophotos, 3D-Gebaeude, historische Karten)
+- 🏗️ Kartenobjekte an Koordinaten ueber 500+ Swisstopo-Layer identifizieren
+- 🔗 Teilbare map.geo.admin.ch-Links generieren
+- 📋 Grundstueck-IDs (EGRID) nachschlagen und OEREB-Auszuege abrufen
+- 🔓 **Kein API-Schluessel erforderlich** fuer 11 von 13 Tools
+- ☁️ **Dualer Transport** -- stdio (Claude Desktop) + Streamable HTTP (Cloud)
+
+---
+
+## Voraussetzungen
+
+- Python 3.11+
+- [uv](https://github.com/astral-sh/uv) (empfohlen) oder pip
+
+---
+
+## Installation
+
+```bash
+# Repository klonen
+git clone https://github.com/malkreide/swisstopo-mcp.git
+cd swisstopo-mcp
+
+# Installieren
+pip install -e .
+# oder mit uv:
+uv pip install -e .
+```
+
+Oder mit `uvx` (ohne dauerhafte Installation):
+
+```bash
+uvx swisstopo-mcp
+```
 
 ---
 
 ## Schnellstart
 
-### Installation
-
 ```bash
-pip install swisstopo-mcp
+# stdio (fuer Claude Desktop)
+python -m swisstopo_mcp.server
+
+# Streamable HTTP (Port 8000)
+python -m swisstopo_mcp.server --http --port 8000
 ```
 
-### Claude Desktop Konfiguration
+Sofort in Claude Desktop ausprobieren:
 
-Fügen Sie Folgendes in Ihre Claude Desktop Konfigurationsdatei `claude_desktop_config.json` ein:
+> *"Wo befindet sich die Bahnhofstrasse 1, Zuerich? Gib mir die Koordinaten."*
+> *"Welche Hoehe hat der Uetliberg-Gipfel?"*
+> *"Welche Gebaeude befinden sich bei den Koordinaten 2683500, 1247500 (LV95)?"*
+
+---
+
+## Konfiguration
+
+### Claude Desktop
+
+Editiere `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) bzw. `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
   "mcpServers": {
     "swisstopo": {
-      "command": "swisstopo-mcp",
-      "env": {
-        "SWISSTOPO_OEREB_CANTONS": "ZH"
-      }
+      "command": "python",
+      "args": ["-m", "swisstopo_mcp.server"]
     }
   }
 }
 ```
 
-Unter macOS befindet sich die Konfigurationsdatei unter `~/Library/Application Support/Claude/claude_desktop_config.json`.
-Unter Windows unter `%APPDATA%\Claude\claude_desktop_config.json`.
+Oder mit `uvx`:
+
+```json
+{
+  "mcpServers": {
+    "swisstopo": {
+      "command": "uvx",
+      "args": ["swisstopo-mcp"]
+    }
+  }
+}
+```
+
+**Pfad zur Konfigurationsdatei:**
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+### Cloud-Deployment (SSE fuer Browser-Zugriff)
+
+Fuer den Einsatz via **claude.ai im Browser** (z.B. auf verwalteten Arbeitsplaetzen ohne lokale Software):
+
+**Render.com (empfohlen):**
+1. Repository auf GitHub pushen/forken
+2. Auf [render.com](https://render.com): New Web Service -> GitHub-Repo verbinden
+3. Start-Befehl setzen: `python -m swisstopo_mcp.server --http --port 8000`
+4. In claude.ai unter Settings -> MCP Servers eintragen: `https://your-app.onrender.com/sse`
 
 ---
 
-## Tool-Übersicht
+## Verfuegbare Tools
 
-| Tool | Titel | Beschreibung |
-|------|-------|-------------|
-| `swisstopo_geocode` | Adresse geocodieren | Schweizerische Adressen, Ortsnamen oder PLZ in Koordinaten umwandeln |
-| `swisstopo_reverse_geocode` | Koordinaten zu Adresse | Nächstgelegene Adresse zu gegebenen Koordinaten finden |
-| `swisstopo_search_layers` | Swisstopo Layer suchen | Swisstopo-Layerkatalog (500+ Layer) nach Stichwort durchsuchen |
-| `swisstopo_identify_features` | Features an Koordinate identifizieren | Kartenobjekte an einer bestimmten Koordinate finden (räumliche Abfrage) |
-| `swisstopo_find_features` | Features nach Attribut suchen | Features anhand eines Attributwerts in einem Layer suchen (z.B. Gebäude nach EGID) |
-| `swisstopo_get_feature` | Feature-Details abrufen | Vollständige Attribute und Geometrie eines Features per ID abrufen |
-| `swisstopo_search_geodata` | Geodaten suchen | STAC-Katalog nach herunterladbaren Geodatensätzen durchsuchen |
-| `swisstopo_get_collection` | Geodaten-Details abrufen | Details und Download-Links einer STAC-Collection abrufen |
-| `swisstopo_map_url` | Karten-URL generieren | map.geo.admin.ch-URL zum Öffnen im Browser generieren |
-| `swisstopo_get_height` | Höhe abfragen | Höhe über Meer (m ü. M.) an einer Koordinate abfragen |
-| `swisstopo_elevation_profile` | Höhenprofil berechnen | Höhenprofil entlang einer Linie berechnen |
-| `swisstopo_get_egrid` | Grundstück-ID (EGRID) ermitteln | Kataster-Grundstück-ID (EGRID) aus Koordinaten ermitteln |
-| `swisstopo_get_oereb_extract` | ÖREB-Auszug abrufen | Öffentlich-rechtliche Eigentumsbeschränkungen (ÖREB) für ein Grundstück abrufen |
+### REST API (Layer- & Feature-Abfragen)
 
----
+| Tool | Beschreibung |
+|------|-------------|
+| `swisstopo_search_layers` | Swisstopo-Layerkatalog (500+ Layer) nach Stichwort durchsuchen |
+| `swisstopo_identify_features` | Kartenobjekte an einer bestimmten Koordinate finden (raeumliche Abfrage) |
+| `swisstopo_find_features` | Features anhand eines Attributwerts in einem Layer suchen (z.B. Gebaeude nach EGID) |
+| `swisstopo_get_feature` | Vollstaendige Attribute und Geometrie eines Features per ID abrufen |
 
-## Umgebungsvariablen
+### Geocoding
 
-| Variable | Standard | Beschreibung |
-|----------|---------|-------------|
-| `SWISSTOPO_OEREB_CANTONS` | *(keiner)* | Kommagetrennte Liste der Kantone für ÖREB-Abfragen (z.B. `ZH,BE,LU`). Erforderlich für `swisstopo_get_egrid` und `swisstopo_get_oereb_extract`. |
-| `MCP_TRANSPORT` | `stdio` | Transportprotokoll: `stdio` (Standard), `sse` oder `streamable-http` |
-| `MCP_PORT` | `8000` | Port für SSE- oder HTTP-Transportmodus |
+| Tool | Beschreibung |
+|------|-------------|
+| `swisstopo_geocode` | Schweizerische Adressen, Ortsnamen oder PLZ in Koordinaten umwandeln |
+| `swisstopo_reverse_geocode` | Naechstgelegene Adresse zu gegebenen Koordinaten finden |
 
----
+### Hoehenservice
 
-## Verwendungsbeispiele
+| Tool | Beschreibung |
+|------|-------------|
+| `swisstopo_get_height` | Hoehe ueber Meer (m ue. M.) an einer Koordinate abfragen |
+| `swisstopo_elevation_profile` | Hoehenprofil entlang einer Linie berechnen |
 
-### Adresse geocodieren
+### STAC-Katalog (Geodaten-Downloads)
 
-Fragen Sie Claude:
-> "Wo befindet sich die Bahnhofstrasse 1, Zürich? Gib mir die Koordinaten."
+| Tool | Beschreibung |
+|------|-------------|
+| `swisstopo_search_geodata` | STAC-Katalog nach herunterladbaren Geodatensaetzen durchsuchen |
+| `swisstopo_get_collection` | Details und Download-Links einer STAC-Collection abrufen |
 
-Claude ruft `swisstopo_geocode` mit der Adresse auf und gibt WGS84-Koordinaten zurück.
+### WMTS (Karten-URLs)
 
-### Höhe an einem Punkt abfragen
+| Tool | Beschreibung |
+|------|-------------|
+| `swisstopo_map_url` | map.geo.admin.ch-URL zum Oeffnen im Browser generieren |
 
-Fragen Sie Claude:
-> "Welche Höhe hat der Uetliberg-Gipfel in Zürich?"
+### OEREB-Kataster
 
-Claude geocodiert den Standort und ruft dann `swisstopo_get_height` auf.
+| Tool | Beschreibung |
+|------|-------------|
+| `swisstopo_get_egrid` | Kataster-Grundstueck-ID (EGRID) aus Koordinaten ermitteln |
+| `swisstopo_get_oereb_extract` | Oeffentlich-rechtliche Eigentumsbeschraenkungen (OEREB) fuer ein Grundstueck abrufen |
 
-### Features auf einem Kartenlayer identifizieren
+### Beispiel-Abfragen
 
-Fragen Sie Claude:
-> "Welche Gebäude befinden sich bei den Koordinaten 2683500, 1247500 (LV95)?"
-
-Claude verwendet `swisstopo_identify_features` auf dem Gebäude-Layer.
-
-### Grundstückseinschränkungen nachschlagen
-
-Fragen Sie Claude:
-> "Welche Nutzungseinschränkungen gelten für das Grundstück an der Musterstrasse 5, Zürich?"
-
-Claude ruft `swisstopo_get_egrid` auf, um die EGRID zu ermitteln, und dann `swisstopo_get_oereb_extract` für den vollständigen Katasterauszug.
+| Abfrage | Tool |
+|---------|------|
+| *"Wo ist die Bahnhofstrasse 1, Zuerich?"* | `swisstopo_geocode` |
+| *"Welche Hoehe hat der Uetliberg-Gipfel?"* | `swisstopo_get_height` |
+| *"Welche Gebaeude bei Koordinaten 2683500, 1247500?"* | `swisstopo_identify_features` |
+| *"Finde Orthophoto-Datensaetze zum Download"* | `swisstopo_search_geodata` |
+| *"Zeige mir eine Karte von Bern bei Zoomstufe 10"* | `swisstopo_map_url` |
+| *"Welche Einschraenkungen gelten fuer Musterstrasse 5?"* | `swisstopo_get_egrid` + `swisstopo_get_oereb_extract` |
 
 ---
 
-## Als HTTP-Server betreiben
+## Architektur
 
-Für Web-Anwendungen oder Multi-Client-Szenarien:
-
-```bash
-MCP_TRANSPORT=sse MCP_PORT=8080 swisstopo-mcp
+```
+┌─────────────────┐     ┌──────────────────────────────┐     ┌──────────────────────────┐
+│   Claude / KI   │────▶│  swisstopo-mcp               │────▶│  Swisstopo REST API      │
+│   (MCP Host)    │◀────│  (MCP Server)                │◀────│  api3.geo.admin.ch       │
+└─────────────────┘     │                              │     ├──────────────────────────┤
+                        │  13 Tools                    │────▶│  Geocoding               │
+                        │  Stdio | Streamable HTTP     │◀────│  api3.geo.admin.ch       │
+                        │                              │     ├──────────────────────────┤
+                        │  Keine Authentifizierung     │────▶│  STAC-Katalog            │
+                        │  (11 von 13 Tools)           │◀────│  data.geo.admin.ch       │
+                        │                              │     ├──────────────────────────┤
+                        │                              │────▶│  OEREB-Kataster          │
+                        │                              │◀────│  (kantonale Endpunkte)   │
+                        └──────────────────────────────┘     └──────────────────────────┘
 ```
 
 ---
 
-## Entwicklung
+## Projektstruktur
 
-### Einrichtung
-
-```bash
-git clone https://github.com/malkreide/swisstopo-mcp.git
-cd swisstopo-mcp
-pip install -e ".[dev]"
+```
+swisstopo-mcp/
+├── src/swisstopo_mcp/
+│   ├── __init__.py              # Package-Version
+│   ├── server.py                # MCP-Server (Tool-Registrierungen)
+│   ├── api_client.py            # Gemeinsamer HTTP-Client (httpx + Fehlerbehandlung)
+│   ├── geocoding.py             # swisstopo_geocode, swisstopo_reverse_geocode
+│   ├── rest_api.py              # swisstopo_search_layers, identify, find, get_feature
+│   ├── height.py                # swisstopo_get_height, swisstopo_elevation_profile
+│   ├── stac.py                  # swisstopo_search_geodata, swisstopo_get_collection
+│   ├── wmts.py                  # swisstopo_map_url
+│   └── oereb.py                 # swisstopo_get_egrid, swisstopo_get_oereb_extract
+├── tests/
+│   ├── test_api_client.py
+│   ├── test_geocoding.py
+│   ├── test_height.py
+│   ├── test_oereb.py
+│   ├── test_rest_api.py
+│   ├── test_stac.py
+│   └── test_wmts.py
+├── .github/workflows/ci.yml     # GitHub Actions (Python 3.11/3.12/3.13)
+├── pyproject.toml
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md                    # Englische Hauptversion
+└── README.de.md                 # Diese Datei (Deutsch)
 ```
 
-### Tests ausführen
+---
+
+## Bekannte Einschraenkungen
+
+- **OEREB-Tools** erfordern einen Kantons-Parameter; nicht alle Kantone bieten dasselbe API-Format
+- **STAC-Katalog** verwendet den Swisstopo-v0.9-Endpunkt; einige Collections haben ggf. unvollstaendige Metadaten
+- **Geocoding** deckt nur Schweizer Adressen ab (kein Liechtenstein)
+- **Rate Limits** werden von Swisstopo durchgesetzt; hochfrequente Nutzung kann gedrosselt werden
+
+---
+
+## Tests
 
 ```bash
-# Nur Unit-Tests (kein Netzwerk erforderlich)
-pytest tests/ -m "not live" -v
+# Unit-Tests (kein Netzwerk erforderlich)
+pytest tests/ -m "not live"
 
-# Alle Tests inkl. Live-API-Aufrufe
-pytest tests/ -v
+# Integrationstests (Live-API-Aufrufe)
+pytest tests/ -m "live"
 ```
 
-### Code-Stil
+---
 
-Dieses Projekt verwendet [ruff](https://docs.astral.sh/ruff/) für Linting und Formatierung:
+## Changelog
 
-```bash
-ruff check src/ tests/
-ruff format src/ tests/
-```
+Siehe [CHANGELOG.md](CHANGELOG.md)
+
+---
+
+## Mitwirken
+
+Siehe [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
 ## Lizenz
 
-MIT — siehe [LICENSE](LICENSE) für Details.
+MIT-Lizenz -- siehe [LICENSE](LICENSE)
 
 Daten bereitgestellt von [swisstopo](https://www.swisstopo.admin.ch/) unter den Bedingungen von [Open Government Data](https://opendata.swiss/).
+
+---
+
+## Autor
+
+Hayal Oezkan · [malkreide](https://github.com/malkreide)
+
+---
+
+## Credits & Verwandte Projekte
+
+- **Swisstopo:** [www.swisstopo.admin.ch](https://www.swisstopo.admin.ch/) -- Bundesamt fuer Landestopografie
+- **Swisstopo APIs:** [api3.geo.admin.ch](https://api3.geo.admin.ch/) / [data.geo.admin.ch](https://data.geo.admin.ch/)
+- **Protokoll:** [Model Context Protocol](https://modelcontextprotocol.io/) -- Anthropic / Linux Foundation
+- **Verwandt:** [zurich-opendata-mcp](https://github.com/malkreide/zurich-opendata-mcp) -- Zuercher Open Data
+- **Verwandt:** [swiss-transport-mcp](https://github.com/malkreide/swiss-transport-mcp) -- Schweizer oeffentlicher Verkehr
+- **Verwandt:** [swiss-cultural-heritage-mcp](https://github.com/malkreide/swiss-cultural-heritage-mcp) -- Schweizer Kulturerbe
+- **Portfolio:** [Swiss Public Data MCP Portfolio](https://github.com/malkreide)
