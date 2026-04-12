@@ -12,7 +12,7 @@ STAC_BASE = "https://data.geo.admin.ch/api/stac/v0.9"
 WMTS_BASE = "https://wmts.geo.admin.ch/1.0.0"
 
 REQUEST_TIMEOUT = 30.0
-USER_AGENT = "SwisstopoMCP/0.1 (MCP Server; +https://github.com/schulamt-zurich/swisstopo-mcp)"
+USER_AGENT = "SwisstopoMCP/0.1 (MCP Server; +https://github.com/malkreide/swisstopo-mcp)"
 
 # Swiss bounding box (WGS84)
 CH_LAT_MIN, CH_LAT_MAX = 45.8, 47.9

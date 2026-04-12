@@ -4,7 +4,7 @@ MCP server for Swiss federal geodata (Swisstopo APIs)
 
 Gives AI assistants (Claude, etc.) access to Switzerland's official geodata infrastructure — maps, elevation, geocoding, cadastral extracts, and downloadable datasets — through 13 tools across 6 API families.
 
-[![CI](https://github.com/schulamt-zh/swisstopo-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/schulamt-zh/swisstopo-mcp/actions/workflows/ci.yml)
+[![CI](https://github.com/malkreide/swisstopo-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/malkreide/swisstopo-mcp/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/swisstopo-mcp.svg)](https://pypi.org/project/swisstopo-mcp/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -130,7 +130,7 @@ MCP_TRANSPORT=sse MCP_PORT=8080 swisstopo-mcp
 ### Setup
 
 ```bash
-git clone https://github.com/schulamt-zh/swisstopo-mcp.git
+git clone https://github.com/malkreide/swisstopo-mcp.git
 cd swisstopo-mcp
 pip install -e ".[dev]"
 ```

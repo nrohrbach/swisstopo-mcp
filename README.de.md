@@ -4,7 +4,7 @@ MCP-Server für schweizerische Bundgeodaten (Swisstopo-APIs)
 
 Gibt KI-Assistenten (Claude, etc.) Zugriff auf die offizielle schweizerische Geodateninfrastruktur — Karten, Höhenmodelle, Geocodierung, Katasterauszüge und herunterladbare Datensätze — über 13 Tools aus 6 API-Familien.
 
-[![CI](https://github.com/schulamt-zh/swisstopo-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/schulamt-gh/swisstopo-mcp/actions/workflows/ci.yml)
+[![CI](https://github.com/malkreide/swisstopo-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/malkreide/swisstopo-mcp/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/swisstopo-mcp.svg)](https://pypi.org/project/swisstopo-mcp/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-yellow.svg)](LICENSE)
@@ -130,7 +130,7 @@ MCP_TRANSPORT=sse MCP_PORT=8080 swisstopo-mcp
 ### Einrichtung
 
 ```bash
-git clone https://github.com/schulamt-gh/swisstopo-mcp.git
+git clone https://github.com/malkreide/swisstopo-mcp.git
 cd swisstopo-mcp
 pip install -e ".[dev]"
 ```
