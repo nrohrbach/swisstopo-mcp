@@ -275,11 +275,15 @@ async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
 
 
 if __name__ == "__main__":
+    import os
     import sys
 
     if "--http" in sys.argv:
         port_idx = sys.argv.index("--port") + 1 if "--port" in sys.argv else None
         port = int(sys.argv[port_idx]) if port_idx else 8000
-        mcp.run(transport="streamable-http", port=port)
+        # Neuere mcp-Versionen: port via Umgebungsvariable
+        os.environ["FASTMCP_PORT"] = str(port)
+        os.environ["HOST"] = "0.0.0.0"
+        mcp.run(transport="streamable-http")
     else:
         mcp.run()
