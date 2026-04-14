@@ -273,15 +273,17 @@ async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
     """Ruft öffentlich-rechtliche Eigentumsbeschränkungen (ÖREB) für ein Grundstück ab."""
     return await get_oereb_extract(params)
 
-# Das FastMCP Objekt muss 'app' heißen, damit uvicorn es findet
-app = mcp # Falls dein Objekt 'mcp' heißt, weisen wir es 'app' zu
+# Am Ende der Datei server.py
+
+# Falls deine Instanz mcp heißt, weisen wir sie app zu, damit uvicorn sie findet
+app = mcp 
 
 if __name__ == "__main__":
     import uvicorn
     import os
-    # Hole den Port von Render oder nutze 8000 als Fallback
+    # Render setzt die PORT Variable automatisch
     port = int(os.environ.get("PORT", 8000))
-    # Wir starten uvicorn direkt, um das 'host' Problem zu umgehen
+    # Wir starten den Server explizit auf 0.0.0.0
     uvicorn.run(app, host="0.0.0.0", port=port)
-    else:
-        mcp.run()
+else:
+    mcp.run()
