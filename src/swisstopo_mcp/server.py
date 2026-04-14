@@ -275,11 +275,11 @@ async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
 
 
 if __name__ == "__main__":
-    import sys
-
-    if "--http" in sys.argv:
-        port_idx = sys.argv.index("--port") + 1 if "--port" in sys.argv else None
-        port = int(sys.argv[port_idx]) if port_idx else 8000
-        mcp.run(transport="streamable-http", host="0.0.0.0", port=port)
+    import uvicorn
+    import os
+    # Hole den Port von Render oder nutze 8000 als Fallback
+    port = int(os.environ.get("PORT", 8000))
+    # Wir starten uvicorn direkt, um das 'host' Problem zu umgehen
+    uvicorn.run(app, host="0.0.0.0", port=port)
     else:
         mcp.run()
