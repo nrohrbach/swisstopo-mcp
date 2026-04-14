@@ -273,6 +273,8 @@ async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
     """Ruft öffentlich-rechtliche Eigentumsbeschränkungen (ÖREB) für ein Grundstück ab."""
     return await get_oereb_extract(params)
 
+# Das FastMCP Objekt muss 'app' heißen, damit uvicorn es findet
+app = mcp # Falls dein Objekt 'mcp' heißt, weisen wir es 'app' zu
 
 if __name__ == "__main__":
     import uvicorn
