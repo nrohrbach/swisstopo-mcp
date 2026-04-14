@@ -273,20 +273,13 @@ async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
     """Ruft öffentlich-rechtliche Eigentumsbeschränkungen (ÖREB) für ein Grundstück ab."""
     return await get_oereb_extract(params)
 
-# Am Ende der Datei server.py
-
-# Falls deine Instanz mcp heißt, weisen wir sie app zu, damit uvicorn sie findet
-app = mcp 
+# Diese Zeile ist korrekt und wichtig!
+app = mcp.app 
 
 if __name__ == "__main__":
     import uvicorn
     import os
-    # Render setzt die PORT Variable automatisch
     port = int(os.environ.get("PORT", 8000))
-    # Wir starten den Server explizit auf 0.0.0.0
+    # uvicorn.run startet hier bereits den Server, mcp.run() wird nie erreicht
     uvicorn.run(app, host="0.0.0.0", port=port)
-    mcp.run()
-    
-# Erstelle einen direkten Alias für die ASGI-App
-app = mcp.app
 
