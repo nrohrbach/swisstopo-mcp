@@ -286,3 +286,7 @@ if __name__ == "__main__":
     # Wir starten den Server explizit auf 0.0.0.0
     uvicorn.run(app, host="0.0.0.0", port=port)
     mcp.run()
+    
+# Erstelle einen direkten Alias für die ASGI-App
+app = mcp.app
+
