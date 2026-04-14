@@ -287,16 +287,6 @@ async def handle_sse(request):
             transport
         )
 
-async def handle_sse(request):
-    async with mcp._server_factory() as server:
-        transport = SseServerTransport("/messages")
-        await server.run(
-            request.scope,
-            request.receive,
-            request.send,
-            transport
-        )
-
 # Dies ist das Objekt, das uvicorn laden kann
 app = Starlette(
     routes=[
