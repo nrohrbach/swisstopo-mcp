@@ -8,6 +8,9 @@ Alle Endpunkte sind offen (kein API-Schluessel erforderlich, ausser OEREB-Kanton
 from __future__ import annotations
 
 from mcp.server.fastmcp import FastMCP
+from starlette.applications import Starlette
+from starlette.routing import Route, Mount
+from mcp.server.sse import SseServerTransport
 
 mcp = FastMCP(
     "swisstopo_mcp",
@@ -274,12 +277,34 @@ async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
     return await get_oereb_extract(params)
 
 
-if __name__ == "__main__":
-    import sys
+async def handle_sse(request):
+    async with mcp._server_factory() as server:
+        transport = SseServerTransport("/messages")
+        await server.run(
+            request.scope,
+            request.receive,
+            request.send,
+            transport
+        )
 
-    if "--http" in sys.argv:
-        port_idx = sys.argv.index("--port") + 1 if "--port" in sys.argv else None
-        port = int(sys.argv[port_idx]) if port_idx else 8000
-        mcp.run(transport="streamable-http", port=port)
-    else:
-        mcp.run()
+async def handle_sse(request):
+    async with mcp._server_factory() as server:
+        transport = SseServerTransport("/messages")
+        await server.run(
+            request.scope,
+            request.receive,
+            request.send,
+            transport
+        )
+
+# Dies ist das Objekt, das uvicorn laden kann
+app = Starlette(
+    routes=[
+        Route("/sse", endpoint=handle_sse, methods=["GET"]),
+        Mount("/messages", endpoint=handle_sse, methods=["POST"]),
+    ]
+)
+
+if __name__ == "__main__":
+    # Ermöglicht weiterhin lokales Testen via stdio
+    mcp.run()
