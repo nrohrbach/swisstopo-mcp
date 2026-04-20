@@ -273,27 +273,8 @@ async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
     """Ruft öffentlich-rechtliche Eigentumsbeschränkungen (ÖREB) für ein Grundstück ab."""
     return await get_oereb_extract(params)
 
-# Diese Zeile ist korrekt und wichtig!
-# Wir erstellen einen SSE-Handler, den Render ansprechen kann
-async def handle_sse(request):
-    async with mcp._server_factory() as server:
-        transport = SseServerTransport("/messages")
-        await server.run(
-            request.scope,
-            request.receive,
-            request.send,
-            transport
-        )
-
-# Das ist das Objekt, das uvicorn laden wird
-app = Starlette(
-    routes=[
-        Route("/sse", endpoint=handle_sse, methods=["GET"]),
-        Mount("/messages", endpoint=handle_sse, methods=["POST"]),
-    ]
-)
+app = mcp.sse_app()
 
 if __name__ == "__main__":
-    # Ermöglicht weiterhin lokales Testen via stdio
     mcp.run()
 
