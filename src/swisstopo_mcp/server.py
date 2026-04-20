@@ -273,7 +273,7 @@ async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
     """Ruft öffentlich-rechtliche Eigentumsbeschränkungen (ÖREB) für ein Grundstück ab."""
     return await get_oereb_extract(params)
 
-app = mcp.sse_app()
+app = mcp.streamable_http_app()
 
 if __name__ == "__main__":
     mcp.run()
