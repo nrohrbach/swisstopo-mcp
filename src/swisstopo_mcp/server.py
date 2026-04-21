@@ -6,7 +6,18 @@ Alle Endpunkte sind offen (kein API-Schluessel erforderlich, ausser OEREB-Kanton
 """
 
 from __future__ import annotations
+import json
+import os
+from enum import Enum
+from typing import Any
 
+from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+
+from . import api_client as api
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP(
@@ -273,7 +284,20 @@ async def swisstopo_get_oereb_extract(params: GetOerebExtractInput) -> str:
     """Ruft öffentlich-rechtliche Eigentumsbeschränkungen (ÖREB) für ein Grundstück ab."""
     return await get_oereb_extract(params)
 
-app = mcp.streamable_http_app()
+# --- Entry Point --------------------------------------------------------------
+
+
+def main() -> None:
+    port = int(os.environ.get("PORT", 8000))
+    transport = os.environ.get("MCP_TRANSPORT", "stdio")
+
+    if transport == "streamable_http":
+        mcp.settings.host = "0.0.0.0"
+        mcp.settings.port = port
+        mcp.run(transport="streamable-http")
+    else:
+        mcp.run()
+
 
 if __name__ == "__main__":
-    mcp.run()
+    main()
