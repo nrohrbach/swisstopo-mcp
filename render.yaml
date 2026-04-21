@@ -9,4 +9,3 @@ services:
         value: streamable_http
       - key: PORT
         value: 8000
-    healthCheckPath: /health
