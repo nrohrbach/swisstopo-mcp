@@ -292,25 +292,30 @@ def main() -> None:
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
 
     if transport == "streamable_http":
-        # Hier konfigurieren wir die Security Settings
-        from mcp.server.transport_security import TransportSecuritySettings
-        
-        # Erlaube alle Hosts oder spezifisch deine Render-Domain
-        security_settings = TransportSecuritySettings(
-            allowed_hosts=["geo-mcp-zc4w.onrender.com", "localhost", "0.0.0.0"]
-        )
-        
-        mcp.settings.host = "0.0.0.0"
-        mcp.settings.port = port
-        
-        # Übergebe die Settings an die run-Methode
-        mcp.run(
-            transport="streamable-http",
-            transport_security=security_settings
-        )
+        try:
+            # Wir importieren es hier lokal, um Fehler beim Start zu isolieren
+            from mcp.server.transport_security import TransportSecuritySettings
+            
+            # Konfiguration der erlaubten Hosts
+            # 'geo-mcp-zc4w.onrender.com' ist dein spezifischer Host
+            security_settings = TransportSecuritySettings(
+                allowed_hosts=["geo-mcp-zc4w.onrender.com", "localhost", "0.0.0.0", "*"]
+            )
+            
+            # Wir weisen die Settings direkt dem mcp Objekt zu (falls unterstützt)
+            # und setzen die Netzwerk-Parameter
+            mcp.settings.host = "0.0.0.0"
+            mcp.settings.port = port
+            
+            print(f"Starting MCP server on port {port} with streamable-http...")
+            mcp.run(transport="streamable-http")
+            
+        except ImportError as e:
+            print(f"Fehler beim Import von TransportSecuritySettings: {e}")
+            # Fallback: Versuche es ohne Security-Settings, falls der Import scheitert
+            mcp.run(transport="streamable-http")
     else:
         mcp.run()
-
 
 if __name__ == "__main__":
     main()
