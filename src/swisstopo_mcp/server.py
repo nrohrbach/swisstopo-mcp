@@ -292,11 +292,13 @@ def main() -> None:
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
 
     if transport == "streamable_http":
-        # Host und allowed_hosts VOR dem Start konfigurieren
+        from mcp.server.transport_security import TransportSecuritySettings
+        
         mcp.settings.host = "0.0.0.0"
         mcp.settings.port = port
-        # Alle Hosts erlauben (für Render.com nötig)
-        mcp.settings.allowed_hosts = ["*"]
+        mcp.settings.transport_security = TransportSecuritySettings(
+            enable_dns_rebinding_protection=False  # Render.com braucht das
+        )
         print(f"Starting Streamable HTTP on 0.0.0.0:{port}")
         mcp.run(transport="streamable-http")
     else:
