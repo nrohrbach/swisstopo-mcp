@@ -294,20 +294,21 @@ def main() -> None:
     if transport == "streamable_http":
         from mcp.server.transport_security import TransportSecuritySettings
         
-        # Hier erlauben wir explizit deine Render-URL
-        # Das "*" ist ein Wildcard und erlaubt alle Hosts, was auf Render oft nötig ist
+        # 1. Erstelle die Sicherheits-Einstellungen
         security_settings = TransportSecuritySettings(
-            allowed_hosts=["geo-mcp-zc4w.onrender.com", "*"]
+            allowed_hosts=["geo-mcp-zc4w.onrender.com", "localhost", "0.0.0.0", "*"]
         )
         
+        # 2. Konfiguriere die Host/Port-Settings wie gewohnt
         mcp.settings.host = "0.0.0.0"
         mcp.settings.port = port
         
-        # WICHTIG: Die security_settings müssen hier übergeben werden
-        mcp.run(
-            transport="streamable-http",
-            transport_security=security_settings
-        )
+        # 3. Weise die Security-Settings dem Server-Objekt direkt zu
+        # FastMCP hat ein internes 'server' Attribut
+        mcp.server.settings.transport_security = security_settings
+        
+        print(f"Starting MCP server on port {port} with transport-security fix...")
+        mcp.run(transport="streamable-http")
     else:
         mcp.run()
 
