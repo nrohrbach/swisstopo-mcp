@@ -9,3 +9,5 @@ services:
         value: streamable_http
       - key: PORT
         value: 8000
+      - key: MCP_ALLOWED_HOSTS
+        value: "*"
