@@ -292,9 +292,22 @@ def main() -> None:
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
 
     if transport == "streamable_http":
+        # Hier konfigurieren wir die Security Settings
+        from mcp.server.transport_security import TransportSecuritySettings
+        
+        # Erlaube alle Hosts oder spezifisch deine Render-Domain
+        security_settings = TransportSecuritySettings(
+            allowed_hosts=["geo-mcp-zc4w.onrender.com", "localhost", "0.0.0.0"]
+        )
+        
         mcp.settings.host = "0.0.0.0"
         mcp.settings.port = port
-        mcp.run(transport="streamable-http")
+        
+        # Übergebe die Settings an die run-Methode
+        mcp.run(
+            transport="streamable-http",
+            transport_security=security_settings
+        )
     else:
         mcp.run()
 
