@@ -292,24 +292,13 @@ def main() -> None:
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
 
     if transport == "streamable_http":
-        # Wir setzen die Host-Konfiguration direkt in den Settings des FastMCP-Objekts
-        # Einige Versionen von FastMCP erlauben den Zugriff auf .settings
-        try:
-            mcp.settings.host = "0.0.0.0"
-            mcp.settings.port = port
-            
-            # Da wir mcp.server nicht direkt greifen können, nutzen wir 
-            # Umgebungsvariablen, die das SDK intern beim Instanziieren ausliest.
-            # Das ist oft der "unsichtbare" Weg, um den Host-Check zu umgehen.
-            os.environ["MCP_ALLOWED_HOSTS"] = "geo-mcp-zc4w.onrender.com,*"
-            
-            print(f"Starting MCP server on port {port} with Environment Patch...")
-            mcp.run(transport="streamable-http")
-        except Exception as e:
-            print(f"Fehler beim Start: {e}")
-            # Letzter Rettungsanker: Einfach starten und hoffen, 
-            # dass die Umgebungsvariable MCP_ALLOWED_HOSTS greift.
-            mcp.run(transport="streamable-http")
+        # Host und allowed_hosts VOR dem Start konfigurieren
+        mcp.settings.host = "0.0.0.0"
+        mcp.settings.port = port
+        # Alle Hosts erlauben (für Render.com nötig)
+        mcp.settings.allowed_hosts = ["*"]
+        print(f"Starting Streamable HTTP on 0.0.0.0:{port}")
+        mcp.run(transport="streamable-http")
     else:
         mcp.run()
 
