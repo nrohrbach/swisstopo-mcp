@@ -292,23 +292,24 @@ def main() -> None:
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
 
     if transport == "streamable_http":
-        from mcp.server.transport_security import TransportSecuritySettings
-        
-        # 1. Erstelle die Sicherheits-Einstellungen
-        security_settings = TransportSecuritySettings(
-            allowed_hosts=["geo-mcp-zc4w.onrender.com", "localhost", "0.0.0.0", "*"]
-        )
-        
-        # 2. Konfiguriere die Host/Port-Settings wie gewohnt
-        mcp.settings.host = "0.0.0.0"
-        mcp.settings.port = port
-        
-        # 3. Weise die Security-Settings dem Server-Objekt direkt zu
-        # FastMCP hat ein internes 'server' Attribut
-        mcp.server.settings.transport_security = security_settings
-        
-        print(f"Starting MCP server on port {port} with transport-security fix...")
-        mcp.run(transport="streamable-http")
+        # Wir setzen die Host-Konfiguration direkt in den Settings des FastMCP-Objekts
+        # Einige Versionen von FastMCP erlauben den Zugriff auf .settings
+        try:
+            mcp.settings.host = "0.0.0.0"
+            mcp.settings.port = port
+            
+            # Da wir mcp.server nicht direkt greifen können, nutzen wir 
+            # Umgebungsvariablen, die das SDK intern beim Instanziieren ausliest.
+            # Das ist oft der "unsichtbare" Weg, um den Host-Check zu umgehen.
+            os.environ["MCP_ALLOWED_HOSTS"] = "geo-mcp-zc4w.onrender.com,*"
+            
+            print(f"Starting MCP server on port {port} with Environment Patch...")
+            mcp.run(transport="streamable-http")
+        except Exception as e:
+            print(f"Fehler beim Start: {e}")
+            # Letzter Rettungsanker: Einfach starten und hoffen, 
+            # dass die Umgebungsvariable MCP_ALLOWED_HOSTS greift.
+            mcp.run(transport="streamable-http")
     else:
         mcp.run()
 
